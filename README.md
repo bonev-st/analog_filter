@@ -92,7 +92,7 @@ pip is Python's shopping assistant — it goes and fetches the packages for you.
 ## Step 5 — Run the Script
 
 ```
-python filter.py
+python demo.py
 ```
 
 A window will pop up showing two lines:
@@ -237,7 +237,8 @@ Finally we draw the chart. `plt.show()` opens a window with the plot.
 
 ```
 analog_filter/
-├── filter.py          ← the main script
-├── requirements.txt   ← list of packages needed
-└── README.md          ← this file
+├── filters.py     ← EMAFilter, RMSFilter, AsymmetricFilter (importable library)
+├── demo.py        ← synthetic data generation and comparison plot
+├── requirements.txt
+└── README.md
 ```
