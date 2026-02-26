@@ -1,0 +1,3 @@
+# Direct dependencies
+matplotlib==3.10.8
+pandas==3.0.1
