@@ -1,3 +1,6 @@
+# Author: Stanimir Bonev
+# Description: Generates synthetic step-signal data and plots all three filter outputs for comparison
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from filters import EMAFilter, RMSFilter, AsymmetricFilter

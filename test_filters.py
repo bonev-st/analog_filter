@@ -1,4 +1,5 @@
-"""Unit tests for filters.py — run with: python -m unittest test_filters"""
+# Author: Stanimir Bonev
+# Description: Unit tests for EMAFilter, RMSFilter, and AsymmetricFilter in filters.py
 import unittest
 from math import sqrt
 from filters import EMAFilter, RMSFilter, AsymmetricFilter

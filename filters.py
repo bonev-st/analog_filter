@@ -1,3 +1,6 @@
+# Author: Stanimir Bonev
+# Description: Importable low-pass filter classes — EMAFilter, RMSFilter, AsymmetricFilter
+
 from math import sqrt
 
 
