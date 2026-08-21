@@ -15,9 +15,13 @@ A low-pass filter is like a calm friend who says:
 
 ---
 
-## Step 1 — Install Python on Windows 11
+## Step 1 — Install Python
 
 Python is the language the script is written in. Think of it as teaching your computer a new language.
+You need **Python 3.10 or newer**.
+
+<details open>
+<summary><b>Windows 11</b></summary>
 
 1. Open your web browser and go to **https://www.python.org/downloads/**
 2. Click the big yellow button that says **"Download Python 3.x.x"**
@@ -29,20 +33,50 @@ Python is the language the script is written in. Think of it as teaching your co
 
 To check it worked, open **PowerShell** (press `Win + R`, type `powershell`, press Enter) and type:
 
-```bash
+```powershell
 python --version
 ```
 
-You should see something like `Python 3.12.4`.
+</details>
+
+<details open>
+<summary><b>Ubuntu / Debian Linux</b></summary>
+
+Python is already installed, but two extra system packages are needed:
+`python3-venv` (to create the project's virtual environment) and `python3-tk`
+(so the plot can open in a window).
+
+Open a **terminal** (`Ctrl + Alt + T`) and run:
+
+```bash
+sudo apt update
+sudo apt install python3 python3-venv python3-pip python3-tk
+```
+
+Check it worked:
+
+```bash
+python3 --version
+```
+
+</details>
+
+You should see something like `Python 3.12.4` (any version 3.10 or higher is fine).
 
 ---
 
 ## Step 2 — Get the Project Files
 
-Open **PowerShell** and go to the folder where the project lives:
+Open your terminal and go to the folder where the project lives:
+
+```powershell
+# Windows (PowerShell)
+cd "<git_repo>\analog_filter"
+```
 
 ```bash
-cd "<git_repo>\analog_filter"
+# Ubuntu / Linux
+cd ~/<git_repo>/analog_filter
 ```
 
 ---
@@ -52,21 +86,27 @@ cd "<git_repo>\analog_filter"
 A virtual environment is like a **lunchbox just for this project**.
 It keeps all the tools this project needs inside its own box, so they do not mix with other projects.
 
-In PowerShell, run:
+**Windows (PowerShell):**
 
-```bash
+```powershell
 python -m venv .venv
-```
-
-This creates a hidden folder called `.venv` in the project directory.
-
-Now **activate** the lunchbox (tell Windows to use it):
-
-```bash
 .venv\Scripts\activate
 ```
 
-Your PowerShell prompt will change and show `(.venv)` at the start — that means it is active!
+> If PowerShell refuses to run the activate script, allow it once with:
+> `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned`
+
+**Ubuntu / Linux:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Either way, your prompt will change and show `(.venv)` at the start — that means it is active!
+
+> On Ubuntu, always use `python3` and `pip3` **outside** the virtual environment.
+> Once `(.venv)` is active, plain `python` and `pip` point at the environment and work fine.
 
 ---
 
@@ -79,13 +119,16 @@ The script needs two helper libraries:
 | `pandas` | Organises data into a table (like a spreadsheet) |
 | `matplotlib` | Draws charts and plots |
 
-Install them with one command:
+Install them with one command (with `(.venv)` active):
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 pip is Python's shopping assistant — it goes and fetches the packages for you.
+
+`requirements.txt` uses version *ranges* rather than exact pins, so the same file
+resolves correctly on Windows, macOS and Linux and across Python versions.
 
 ---
 
@@ -101,6 +144,28 @@ A window will pop up showing four lines:
 - **Green line** — RMS filtered (smooths signal power, always stays positive)
 - **Red line** — Asymmetric filtered (rises slowly, falls very slowly)
 
+### No window? (headless Linux, SSH, WSL, containers)
+
+If there is no graphical session, `demo.py` detects it automatically, draws the
+plot to a PNG file instead of a window, and tells you where it saved it:
+
+```bash
+$ python demo.py
+No interactive display available.
+Plot written to /home/you/analog_filter/analog_filter.png
+```
+
+You can also ask for a file explicitly at any time:
+
+```bash
+python demo.py --output              # writes analog_filter.png
+python demo.py --output my_plot.png  # writes the name you choose
+```
+
+If you *do* have a desktop session but still get a file instead of a window,
+matplotlib could not find a GUI toolkit — install it with
+`sudo apt install python3-tk` and try again.
+
 ---
 
 ## Step 6 — Run the Tests
@@ -109,7 +174,8 @@ The filter classes have a suite of unit tests that you can run any time to verif
 No extra packages are needed — Python's built-in `unittest` module is used.
 
 ```bash
-python -m unittest test_filters -v
+python -m unittest test_filters -v      # inside the virtual environment
+python3 -m unittest test_filters -v     # Ubuntu, without a virtual environment
 ```
 
 You should see 29 lines ending in `ok` and a final summary:
@@ -225,11 +291,23 @@ You want it to show a drop quickly (so the user knows), but rise slowly (so it d
 ### `demo.py` — Generating Data and Plotting
 
 ```python
+import matplotlib
 import pandas as pd
-import matplotlib.pyplot as plt
 from filters import EMAFilter, RMSFilter, AsymmetricFilter
 ```
 We bring in our helper tools: `pandas` for the data table, `matplotlib` for drawing, and the three filter classes from `filters.py`.
+
+```python
+interactive = args.output is None and have_display()
+if not interactive:
+    matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
+```
+Before `pyplot` is imported we choose how matplotlib should draw. With a desktop
+session it uses a window; otherwise it switches to `Agg`, which draws straight to
+an image file. This is what lets the same script run on a Windows desktop and on
+a headless Linux server without changes.
 
 ---
 
@@ -274,11 +352,16 @@ plt.xlabel("Time (s)")
 plt.ylabel("Value")
 plt.title("Analog Filter Comparison")
 plt.legend()
-plt.show()
+plt.tight_layout()
+
+if interactive:
+    plt.show()
+else:
+    plt.savefig(output, dpi=150)
 ```
 
 Finally we draw the chart with all four lines so you can compare the three filter behaviours side by side.
-`plt.show()` opens a window with the plot.
+`plt.show()` opens a window with the plot; `plt.savefig()` writes it to a PNG when there is no window to open.
 
 ---
 
@@ -289,6 +372,6 @@ analog_filter/
 ├── filters.py       ← EMAFilter, RMSFilter, AsymmetricFilter (importable library)
 ├── demo.py          ← synthetic data generation and comparison plot
 ├── test_filters.py  ← unit tests (run with: python -m unittest test_filters -v)
-├── requirements.txt
+├── requirements.txt ← pandas + matplotlib (version ranges, cross-platform)
 └── README.md
 ```

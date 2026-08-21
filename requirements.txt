@@ -1,3 +1,4 @@
-# Direct dependencies
-matplotlib==3.10.8
-pandas==3.0.1
+# Direct dependencies (Python 3.10+)
+# Ranges instead of exact pins so the same file resolves on Windows, macOS and Linux.
+matplotlib>=3.7,<4
+pandas>=2.0,<3
